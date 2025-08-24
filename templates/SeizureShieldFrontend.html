@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seizure Alert System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script> 
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: black;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #3d6cb9, #00fff0);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .navbar {
+            width: 100%;
+            background: none;
+            padding: 15px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            backdrop-filter: blur(10px);
+            box-shadow: none;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .navbar a i {
+            font-size: 20px;
+        }
+        .navbar-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .navbar-title i {
+            font-size: 28px;
+            color: white;
+        }
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            background: rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 100px auto 20px;
+            border-radius: 15px;
+            box-shadow: none;
+            text-align: center;
+        }
+        .profile-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+        .profile-details {
+            text-align: left;
+            flex: 1;
+        }
+        .patient-icon {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: #3d6cb9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .patient-icon i {
+            color: white;
+            font-size: 200px;
+        }
+        .chart-container {
+            margin-top: 20px;
+        }
+        button {
+            background: linear-gradient(45deg, #ff4d4d, #ff1a1a);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 10px rgba(255, 77, 77, 0.4);
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(255, 77, 77, 0.6);
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="navbar-title">
+        <i class="fas fa-shield-alt"></i> SeizureShield
+    </div>
+    <a href="#" onclick="showSection('home')"><i class="fas fa-home"></i> Home</a>
+    <a href="#" onclick="showSection('profile')"><i class="fas fa-user"></i> Profile</a>
+    <a href="#" onclick="showSection('settings')"><i class="fas fa-cog"></i> Settings</a>
+</div>
+
+<div id="home" class="container">
+    <h1>Seizure Alert System</h1>
+    <button onclick="viewAlerts()">View Alert History</button>
+    <button onclick="stopAlert()">Stop Alert Sound</button>
+    <div id="alert-history">
+        <p>Loading seizure alerts...</p>
+    </div>
+    <button onclick="fetchSeizureAlerts()">Refresh Alerts</button>
+    
+    <ul id="alertList"></ul>
+</div>
+
+<div id="profile" class="container hidden">
+    <h1>Patient Profile</h1>
+    <div class="profile-container">
+        <div class="profile-details">
+            <p><strong>Name:</strong> John Doe</p>
+            <p><strong>Age:</strong> 30</p>
+            <p><strong>Condition:</strong> Epilepsy</p>
+        </div>
+        <div class="patient-icon">
+            <i class="fas fa-user-md"></i>
+        </div>
+    </div>
+    <div class="chart-container">
+        <canvas id="seizureChart"></canvas>
+    </div>
+</div>
+
+<div id="settings" class="container hidden">
+    <h1>Settings</h1>
+    <p>Settings will be available soon.</p>
+</div>
+
+<script>
+    function showSection(sectionId) {
+        document.getElementById("home").classList.add("hidden");
+        document.getElementById("profile").classList.add("hidden");
+        document.getElementById("settings").classList.add("hidden");
+        document.getElementById(sectionId).classList.remove("hidden");
+    }
+    
+    function viewAlerts() {
+        console.log("viewAlerts called");
+        fetch("/seizure_alerts")
+            .then(response => response.json())
+            .then(data => {
+                let alertList = document.getElementById("alertList");
+                alertList.innerHTML = "";
+                data.forEach(alert => {
+                    let date = new Date(alert.timestamp.seconds * 1000);
+                    let li = document.createElement("li");
+                    li.textContent = `Alert at ${date.toLocaleString()} - Probability: ${alert.seizure_probability}`;
+                    alertList.appendChild(li);
+                });
+            });
+    }
+
+    function stopAlert() {
+        fetch("/stop_alert")
+            .then(response => response.json())
+            .then(data => alert(data.message));
+    }
+
+</script>
+
+<script>
+    function convertTimestamp(ts) {
+        if (ts && ts.seconds) {
+            return new Date(ts.seconds * 1000);
+        }
+        return new Date(ts);
+    }
+    async function fetchSeizureAlerts() {
+        const response = await fetch('/seizure_alerts');
+        const data = await response.json();
+        const alertContainer = document.getElementById('alert-history');
+
+        alertContainer.innerHTML = ""; // Clear previous alerts
+
+        if (data.error) {
+            alertContainer.innerHTML = `<p>Error: ${data.error}</p>`;
+            return;
+        }
+
+        data.forEach(alert => {
+        const alertElement = document.createElement('div');
+        alertElement.innerHTML = `
+            <p><strong>Time:</strong> ${new Date(alert.timestamp).toLocaleString()}</p>
+            <p><strong>Seizure Probability:</strong> ${alert.seizure_probability}</p>
+            <hr>
+        `;
+    alertContainer.appendChild(alertElement);
+});
+
+    }
+
+    document.addEventListener("DOMContentLoaded", fetchSeizureAlerts);
+</script>
+
+<script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js")
+        .then(() => console.log("Service Worker Registered"))
+        .catch((error) => console.log("Service Worker Registration Failed:", error));
+    }
+</script>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAP_6TDnCCpBhQ7xiKQOi5N9nk0JTSYlB4",
+    authDomain: "seizureshieldfb.firebaseapp.com",
+    projectId: "seizureshieldfb",
+    storageBucket: "seizureshieldfb.appspot.com",
+    messagingSenderId: "491217585407",
+    appId: "1:491217585407:android:38df593fcd8d02db7ab8ca"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const messaging = firebase.messaging();
+  messaging.requestPermission()
+    .then(() => messaging.getToken())
+    .then(token => console.log("FCM Token:", token))
+    .catch(err => console.log("Permission Denied", err));
+</script>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById("seizureChart").getContext("2d");
+        new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+                datasets: [{
+                    label: "Seizures per Month",
+                    data: [3, 4, 2, 5, 6, 3],
+                    borderColor: "#ff4d4d",
+                    backgroundColor: "rgba(255, 77, 77, 0.2)",
+                    borderWidth: 2
+                }]
+            }
+        });
+    });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+
+</body>
+</html>
