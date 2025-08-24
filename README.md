@@ -8,7 +8,7 @@ When abnormal activity is detected, the system automatically sends an **alert vi
 
 ## Project Status
 - Software completed  
-- Hardware integration in progress  
+- Hardware development and integration in progress  
 
 ---
 
