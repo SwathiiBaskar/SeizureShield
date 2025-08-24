@@ -91,7 +91,7 @@ def log_alert(seizure_probability):
         "alert_sent": True
     })
 
-#Send WhatsApp alert via Twilio
+#Sending WhatsApp alert via Twilio
 def send_whatsapp_alert(seizure_probability):
     if seizure_probability is None:
         print("Cannot send alert: Seizure probability is None.")
@@ -107,7 +107,7 @@ def send_whatsapp_alert(seizure_probability):
     except Exception as e:
         print(f"Error sending WhatsApp alert: {e}")
 
-#Send Firebase Cloud Messaging (FCM) notification
+#Sending Firebase Cloud Messaging (FCM) notification
 def send_fcm_alert(seizure_probability):
     if seizure_probability is None:
         print("Cannot send FCM alert: Seizure probability is None.")
@@ -150,7 +150,7 @@ def eeg_monitoring():
 
         time.sleep(5)  # Simulated continuous monitoring
 
-#Start EEG monitoring in a background thread
+#Starting EEG monitoring in a background thread
 if model is not None:
     eeg_thread = threading.Thread(target=eeg_monitoring, daemon=True)
     eeg_thread.start()
